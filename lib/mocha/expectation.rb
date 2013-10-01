@@ -407,6 +407,38 @@ module Mocha
       self
     end
 
+    # Modifies expectation so that when the expected method is called, it runs the callable object provided and returns the value of that object.  Callable may be a proc, lambda or Proc, but only a `proc` will accept parameters.
+    #
+    # @param [Object] proc, lambda or Proc to run when expectation is invoked.
+    # @return [Expectation] the same expectation, thereby allowing invocations of other {Expectation} methods to be chained.
+    #
+    # @see #then
+    #
+    # @overload def runs(callable)
+    #
+    # @example Runs proc when expected method is invoked.
+    #   object = stub()
+    #   object.stubs(:expected_method).runs(proc {puts "running"; 24})
+    #   object.expected_method # => outputs "running" and evaluates to 24
+    #
+    # @example Runs lambda which holds state
+    #   object = stub()
+    #   a = 0
+    #   object.stubs(:expected_method).runs(lambda {a+=1})
+    #   object.expected_method # => 1
+    #   object.expected_method # => 2
+    #
+    # @example Runs proc with parameters
+    #   object = stub()
+    #   object.stubs(:expected_method).runs(proc {|name| "Hi #{name}"})
+    #   object.expected_method('bob') # => "Hi bob"
+    #   object.expected_method('jane') # => "Hi jane"
+    # 
+    def runs(callable)
+      @return_values += ReturnValues.new(Callable.new(callable))
+      self
+    end
+
     # @overload def then
     #   Used as syntactic sugar to improve readability. It has no effect on state of the expectation.
     # @overload def then(state_machine.is(state_name))
@@ -558,7 +590,7 @@ module Mocha
     end
 
     # @private
-    def invoke
+    def invoke(*invokation_arguments)
       @invocation_count += 1
       perform_side_effects()
       if block_given? then
@@ -566,7 +598,7 @@ module Mocha
           yield(*yield_parameters)
         end
       end
-      @return_values.next
+      @return_values.next(*invokation_arguments)
     end
 
     # @private

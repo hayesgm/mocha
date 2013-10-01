@@ -6,7 +6,7 @@ module Mocha
       @tag, @object = tag, object
     end
 
-    def evaluate
+    def evaluate(*invokation_arguments)
       throw @tag, @object
     end
 
