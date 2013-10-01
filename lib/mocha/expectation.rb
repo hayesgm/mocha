@@ -4,6 +4,7 @@ require 'mocha/expectation_error'
 require 'mocha/return_values'
 require 'mocha/exception_raiser'
 require 'mocha/thrower'
+require 'mocha/runner'
 require 'mocha/yield_parameters'
 require 'mocha/is_a'
 require 'mocha/in_state_ordering_constraint'
@@ -435,7 +436,7 @@ module Mocha
     #   object.expected_method('jane') # => "Hi jane"
     # 
     def runs(callable)
-      @return_values += ReturnValues.new(Callable.new(callable))
+      @return_values += ReturnValues.new(Runner.new(callable))
       self
     end
 
